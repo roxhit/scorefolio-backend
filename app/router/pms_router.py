@@ -24,10 +24,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -131,14 +128,12 @@ async def student_login(student_detail: StudentLogin):
             student_detail.password, student_present["password"]
         ):
             student_name = student_present.get("name", "Student")
-            access_token = create_access_token(
-                data={"student_id": student_detail.student_id}
-            )
+
         return {
             "message": "Login successful",
             "student_id": student_detail.student_id,
             "student_name": student_name,
-            "token": access_token,  # Send the token back to the client
+            # Send the token back to the client
         }
 
     except HTTPException as http_err:
